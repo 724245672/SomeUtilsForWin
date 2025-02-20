@@ -7,7 +7,7 @@ import subprocess
 class M3U8Downloader:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("N_m3u8DL-RE 下载脚本")
+        self.root.title("N_m3u8DL-RE 下载工具")
         self.root.geometry("800x600")  # 设置窗口初始大小为 800x600
 
         # 设置默认临时目录和保存目录
