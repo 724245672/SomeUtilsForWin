@@ -245,7 +245,7 @@ class M3U8Downloader:
             finally:
                 # 在线程结束时调用回调
                 if callback:
-                    self.root.after(0, callback,None)
+                    self.root.after(0, callback)
 
         thread = threading.Thread(target=execute, daemon=True)
         thread.start()
