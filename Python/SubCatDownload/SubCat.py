@@ -63,6 +63,18 @@ class SubCatDownloader:
         except Exception:
             button.config(text="下载失败", state="normal")
 
+    def create_context_menu(self):
+        """创建右键菜单，利用 Windows 自带的功能"""
+        menu = tk.Menu(self.root, tearoff=0)
+        menu.add_command(label="复制", command=lambda: self.search_input.event_generate("<<Copy>>"))
+        menu.add_command(label="剪切", command=lambda: self.search_input.event_generate("<<Cut>>"))
+        menu.add_command(label="粘贴", command=lambda: self.search_input.event_generate("<<Paste>>"))
+        return menu
+
+    def show_context_menu(self, event):
+        """显示右键菜单"""
+        self.context_menu.post(event.x_root, event.y_root)
+
     def create_widgets(self):
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_rowconfigure(1, weight=1)
@@ -74,6 +86,10 @@ class SubCatDownloader:
         self.search_input = tk.Entry(top_frame, font=("Arial", 12), relief="flat", borderwidth=2)
         self.search_input.grid(row=0, column=0, padx=(0, 10), pady=5, sticky="ew")
         self.search_input.bind("<Return>", self.sure_search_event)
+
+        # 添加右键菜单绑定
+        self.context_menu = self.create_context_menu()
+        self.search_input.bind("<Button-3>", self.show_context_menu)  # 右键绑定
 
         self.sure_button = tk.Button(top_frame, text="确认搜索", font=("Arial", 12), bg="#4CAF50", fg="white",
                                      relief="flat", command=self.sure_search)
@@ -133,7 +149,7 @@ class SubCatDownloader:
                 spacer = tk.Label(self.scrollable_frame, text="", width=3)
                 spacer.grid(row=i, column=1, pady=5)
 
-                button = tk.Button(self.scrollable_frame, text="下载", font=("Arial", 12),width= 8)
+                button = tk.Button(self.scrollable_frame, text="下载", font=("Arial", 12), width=8)
                 button.grid(row=i, column=2, sticky="e", padx=(0, 10), pady=5)
                 button.config(command=lambda u=url, n=name, b=button: self.download_file(u, n, b))
 
