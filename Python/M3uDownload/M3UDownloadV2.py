@@ -364,12 +364,12 @@ class M3U8Downloader:
         self.save_name_entry.delete(0, tk.END)
         self.display_m3u_content()
 
-def start_flask_server(auth_key, exe_path, tmp_dir, save_dir, m3u_file, port=8088):
+def start_flask_server(auth_key, exe_path, tmp_dir, save_dir, m3u_file, port=8088,tkapp=None):
     from flask import Flask, request, jsonify
 
     app = Flask(__name__)
 
-    CORS(app, resources={r"/*": {"origins": "http://localhost"}})
+    CORS(app)
 
     @app.route('/', methods=['POST'])
     def json_post():
@@ -385,8 +385,11 @@ def start_flask_server(auth_key, exe_path, tmp_dir, save_dir, m3u_file, port=808
             return jsonify({"status": "error", "message": "缺少url或文件名"}), 400
 
         with open(m3u_file, 'a') as m3u_txt:
-            m3u_txt.write(f"\"{exe_path}\" \"{url}\" --save-name \"{save_name}\" --tmp-dir \"{tmp_dir}\" --save-dir \"{save_dir}\"\n")
+            m3u_txt.write(f"\"{exe_path}\" \"{url}\" --save-name \"{save_name}\" --check-segments-count false --no-log --tmp-dir \"{tmp_dir}\" --save-dir \"{save_dir}\"")
 
+        if tkapp:
+            tkapp.root.after(0, tkapp.display_m3u_content)
+            
         return jsonify({"status": "success", "message": "请求成功"}), 200
 
     app.run(host='127.0.0.1', port=port)  # 使用动态端口
@@ -403,7 +406,8 @@ def main():
             tmp_dir=app.tmp_dir,
             save_dir=app.save_dir,
             m3u_file="m3u.txt",
-            port=app.port  # 使用动态端口
+            port=app.port,  # 使用动态端口,
+            tkapp=app
         )
 
     threading.Thread(target=run_flask_with_dynamic_key, daemon=True).start()
