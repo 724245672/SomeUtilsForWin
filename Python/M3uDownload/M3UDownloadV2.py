@@ -64,7 +64,7 @@ class M3U8Downloader:
         """刷新显示 m3u.txt 内容"""
         self.m3u_text.delete(1.0, tk.END)
         if os.path.exists("m3u.txt"):
-            with open("m3u.txt", "r") as m3u_file:
+            with open("m3u.txt", "r", encoding='utf-8') as m3u_file:
                 content = m3u_file.read()
                 self.m3u_text.insert(tk.END, content)
 
@@ -181,7 +181,7 @@ class M3U8Downloader:
 
         # 尝试创建配置文件
         try:
-            with open('config.ini', 'w') as configfile:
+            with open('config.ini', 'w', encoding='utf-8') as configfile:
                 config.write(configfile)
             messagebox.showinfo("保存成功", "配置已保存！")
         except Exception as e:
@@ -244,7 +244,7 @@ class M3U8Downloader:
             return
 
         if os.path.exists("m3u.txt"):
-            with open("m3u.txt", "r", encoding='gbk') as m3u_txt:
+            with open("m3u.txt", "r", encoding='utf-8') as m3u_txt:
                 if url in m3u_txt.read():
                     messagebox.showerror("错误", "输入的URL已存在 。")
                     return
@@ -331,7 +331,7 @@ class M3U8Downloader:
             messagebox.showerror("错误", "m3u.txt 文件不存在。")
             return
 
-        with open("m3u.txt", "r") as m3u_file:
+        with open("m3u.txt", "r", encoding='utf-8') as m3u_file:
             command = m3u_file.readline()
             self.run_command(command,self.after_command_finished)
 
@@ -341,12 +341,12 @@ class M3U8Downloader:
             return
 
         """命令完成后更新 UI 并运行下一个任务"""
-        with open("m3u.txt", "r") as m3u_file:
+        with open("m3u.txt", "r", encoding='utf-8') as m3u_file:
             commands = m3u_file.readlines()
             if len(commands) >= 2:
                 self.display_m3u_content()
                 self.run_command(commands[1], self.after_command_finished)
-        with open("m3u.txt", "w") as m3u_file:
+        with open("m3u.txt", "w", encoding='utf-8') as m3u_file:
             if len(commands[1:]) != 0:
                 m3u_file.writelines(commands[1:])
 
@@ -357,7 +357,7 @@ class M3U8Downloader:
         if not command:
             return
 
-        with open("m3u.txt", "a+", encoding='gbk') as m3u_txt:
+        with open("m3u.txt", "a+", encoding='utf-8') as m3u_txt:
             m3u_txt.write(command+"\r")
 
         self.url_entry.delete(0, tk.END)
@@ -384,8 +384,13 @@ def start_flask_server(auth_key, exe_path, tmp_dir, save_dir, m3u_file, port=808
         if not url or not save_name:
             return jsonify({"status": "error", "message": "缺少url或文件名"}), 400
 
-        with open(m3u_file, 'a') as m3u_txt:
-            m3u_txt.write(f"\"{exe_path}\" \"{url}\" --save-name \"{save_name}\" --check-segments-count false --no-log --tmp-dir \"{tmp_dir}\" --save-dir \"{save_dir}\"")
+        if os.path.exists("m3u.txt"):
+            with open("m3u.txt", "r", encoding='utf-8') as m3u_txt:
+                if url in m3u_txt.read():
+                    return jsonify({"status": "error", "message": "url已经存在"}), 400
+
+        with open("m3u.txt", "a+", encoding='utf-8') as m3u_txt:
+            m3u_txt.write(f"\"{exe_path}\" \"{url}\" --save-name \"{save_name}\" --check-segments-count false --no-log --tmp-dir \"{tmp_dir}\" --save-dir \"{save_dir}\"\r")
 
         if tkapp:
             tkapp.root.after(0, tkapp.display_m3u_content)
